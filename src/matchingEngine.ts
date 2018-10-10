@@ -18,36 +18,29 @@ namespace Utils {
     }
 }
 
-enum OrderStatus {
-    /**
-     * When Order is Accepted By Exchange
-     */
-    new,
-    /**
-     * When Order is Filled By Exchange
-     */
-    filled,
-    /**
-     * When Order is Rejected By Exchange
-     */
-    rejected,
-    /**
-     * When Cancel Order is Rejected By Exchange
-     */
-    cancelRejected,
-    /**
-     * When Order is Cancelled By Exchange
-     */
-    canceled
+enum MEErrorCode {
+    invalidSymbol,
+    invalidOrderId,
+    invalidOrder,
+    invalidSide,
+    invalidQty
 }
 
-interface OrderResponse {
-    orderId: number;
-    instrument: string;
-    price: number;
-    qty: number;
-    status: OrderStatus;
+enum MESuccessCode {
+    orderCanceled,
+    orderPlaced
+}
+
+interface MatchingEngineResponseData {
+    order: Order;
+    trades: Trade[];
+}
+
+interface MatchingEngineResponse {
+    status: boolean;
+    statusCode: MEErrorCode | MESuccessCode;
     message?: string;
+    data?: MatchingEngineResponseData;
 }
 
 export enum OrderSide {
@@ -101,20 +94,17 @@ class OrderBook {
     orderIdMap: { [orderId: number]: Order } = {};
 }
 
-/**
- * TODO: Make the Buy Sell Side Generic
- */
 export class MatchingEngine {
 
     orderBooks: { [instrument: string]: OrderBook } = {};
     currOrderId = 0;
     currTradeId = 0;
 
-    newOrder(instrument: string, price: number, qty: number, side: OrderSide) {
+    newOrder(instrument: string, price: number, qty: number, side: OrderSide): MatchingEngineResponse {
         if (side === OrderSide.buy || side === OrderSide.sell) {
 
             // Init Order
-            const trades = [];
+            const trades: Trade[] = [];
             this.currOrderId += 1;
             const orderId = this.currOrderId;
             const order = new Order({
@@ -196,7 +186,11 @@ export class MatchingEngine {
                         }
 
                     } else {
-                        throw { message: 'Match Quantity must be Greater than 0' };
+                        return {
+                            status: false,
+                            statusCode: MEErrorCode.invalidQty,
+                            message: `Invalid Order Quantity`
+                        };
                     }
                 }
                 /**
@@ -276,7 +270,11 @@ export class MatchingEngine {
                         }
 
                     } else {
-                        throw { message: 'Match Quantity must be Greater than 0' };
+                        return {
+                            status: false,
+                            statusCode: MEErrorCode.invalidQty,
+                            message: `Invalid Order Quantity`
+                        };
                     }
                 }
                 /**
@@ -291,9 +289,21 @@ export class MatchingEngine {
                 }
             }
 
-            return { order: order, trades: trades };
+            return {
+                status: true,
+                statusCode: MESuccessCode.orderPlaced,
+                message: `Order Placed`,
+                data: {
+                    order: order,
+                    trades: trades
+                }
+            };
         } else {
-            throw { message: 'Invalid Side' };
+            return {
+                status: false,
+                statusCode: MEErrorCode.invalidSide,
+                message: `Invalid Order Side`
+            };
         }
     }
 
@@ -302,12 +312,17 @@ export class MatchingEngine {
      * @param orderId 
      * @param instrument 
      */
-    cancelOrder(orderId: number, instrument: string): OrderResponse {
+    cancelOrder(orderId: number, instrument: string): MatchingEngineResponse {
         if (Object.keys(this.orderBooks).indexOf(instrument) >= 0) {
             const orderBook = this.orderBooks[instrument];
 
             if (Object.keys(orderBook.orderIdMap).indexOf(`${orderId}`) === -1) {
-                throw { message: `OrderId Doesn't Exist` };
+                // throw { message: `OrderId Doesn't Exist` };
+                return {
+                    status: false,
+                    statusCode: MEErrorCode.invalidOrderId,
+                    message: `Order Id Doesn't Exist`
+                };
             }
 
             const order: Order = orderBook.orderIdMap[orderId];
@@ -318,57 +333,49 @@ export class MatchingEngine {
             let priceLevel: Array<Order>;
             if (order.side === OrderSide.buy) {
                 if (Object.keys(orderBook.bids).indexOf(`${order.price}`) === -1) {
-                    return this._cancelRejectOrder(order, `Order Doesn't Exist`);
+                    // return this._cancelRejectOrder(order, `Order Doesn't Exist`);
+                    return {
+                        status: false,
+                        statusCode: MEErrorCode.invalidOrder,
+                        message: `Order Doesn't Exist`
+                    };
                 }
                 priceLevel = orderBook.bids[order.price];
             } else {
                 if (Object.keys(orderBook.asks).indexOf(`${order.price}`) === -1) {
-                    return this._cancelRejectOrder(order, `Order Doesn't Exist`);
+                    // return this._cancelRejectOrder(order, `Order Doesn't Exist`);
+                    return {
+                        status: false,
+                        statusCode: MEErrorCode.invalidOrder,
+                        message: `Order Doesn't Exist`
+                    };
                 }
                 priceLevel = orderBook.asks[order.price];
             }
 
-            let index;
-            let cancelledOrder;
             for (let i = 0; i < priceLevel.length; i++) {
                 const iOrder = priceLevel[i];
                 if (iOrder.orderId === orderId) {
                     iOrder.leavesQty = 0;
                     delete orderBook.orderIdMap[orderId];
-                    index = i;
-                    cancelledOrder = this._returnCanceledOrder(iOrder);
-                    break;
+                    // cancelledOrder = this._returnCanceledOrder(iOrder);
+                    // break;
+                    priceLevel.splice(i, 1);
+                    return {
+                        status: true,
+                        statusCode: MESuccessCode.orderCanceled,
+                        message: `Order Cancelled`
+                    };
                 }
             }
-            priceLevel.splice(index, 1);
-            return cancelledOrder;
 
         } else {
-            throw { message: 'Invalid Instrument' };
+            return {
+                status: false,
+                statusCode: MEErrorCode.invalidSymbol,
+                message: `Invalid Symbol`
+            };
         }
     }
-
-    private _returnCanceledOrder(order: Order): OrderResponse {
-        return {
-            status: OrderStatus.canceled,
-            orderId: order.orderId,
-            instrument: order.instrument,
-            price: order.price,
-            qty: order.qty,
-            message: 'Order Cancelled'
-        };
-    }
-
-    private _cancelRejectOrder(order: Order, message: string): OrderResponse {
-        return {
-            status: OrderStatus.cancelRejected,
-            orderId: order.orderId,
-            instrument: order.instrument,
-            price: order.price,
-            qty: order.qty,
-            message: message
-        };
-    }
-
 
 }

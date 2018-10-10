@@ -10,7 +10,7 @@ describe('Matching Engine Test Suite', () => {
 
     it('should place an Order', () => {
         const order = matchEngine.newOrder('DevD', 23.4, 5, OrderSide.buy);
-        expect(order.order.side).to.equal(OrderSide.buy);
+        expect(order.data.order.side).to.equal(OrderSide.buy);
     });
 
 });
