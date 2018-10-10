@@ -171,11 +171,11 @@ export class MatchingEngine {
                             this.currTradeId += 1;
 
                             trades.push(new Trade({
-                                orderId: orderId,
-                                instrument: instrument,
+                                orderId: orderHit.orderId,
+                                instrument: orderHit.instrument,
                                 tradePrice: bestPrice,
                                 tradeQty: matchQty,
-                                tradeSide: OrderSide.buy,
+                                tradeSide: OrderSide.sell,
                                 tradeId: this.currTradeId
                             }));
 
@@ -237,7 +237,7 @@ export class MatchingEngine {
                             instrument: instrument,
                             tradePrice: bestPrice,
                             tradeQty: matchQty,
-                            tradeSide: OrderSide.buy,
+                            tradeSide: OrderSide.sell,
                             tradeId: this.currTradeId
                         }));
 
@@ -251,8 +251,8 @@ export class MatchingEngine {
                             this.currTradeId += 1;
 
                             trades.push(new Trade({
-                                orderId: orderId,
-                                instrument: instrument,
+                                orderId: orderHit.orderId,
+                                instrument: orderHit.instrument,
                                 tradePrice: bestPrice,
                                 tradeQty: matchQty,
                                 tradeSide: OrderSide.buy,
