@@ -18,7 +18,7 @@ namespace Utils {
     }
 }
 
-enum MEErrorCode {
+export enum MEErrorCode {
     invalidSymbol,
     invalidOrderId,
     invalidOrder,
@@ -26,17 +26,17 @@ enum MEErrorCode {
     invalidQty
 }
 
-enum MESuccessCode {
+export enum MESuccessCode {
     orderCanceled,
     orderPlaced
 }
 
-interface MatchingEngineResponseData {
+export interface MatchingEngineResponseData {
     order: Order;
     trades: Trade[];
 }
 
-interface MatchingEngineResponse {
+export interface MatchingEngineResponse {
     status: boolean;
     statusCode: MEErrorCode | MESuccessCode;
     message?: string;
@@ -131,7 +131,7 @@ export class MatchingEngine {
                  */
                 let bestPrice = Utils.getObjMin(orderBook.asks);
                 while (bestPrice !== null && (bestPrice === 0 || price >= bestPrice) && order.leavesQty > 0) {
-                    const qtyAtBestPrice = Utils.sumOfProperty(orderBook.asks[bestPrice], 'qty');
+                    const qtyAtBestPrice = Utils.sumOfProperty(orderBook.asks[bestPrice], 'leavesQty');
                     let matchQty = Math.min(qtyAtBestPrice, order.leavesQty);
                     if (matchQty > 0) {
 
@@ -214,7 +214,7 @@ export class MatchingEngine {
                  */
                 let bestPrice = Utils.getObjMax(orderBook.bids);
                 while (bestPrice !== null && (bestPrice === 0 || price <= bestPrice) && order.leavesQty > 0) {
-                    const qtyAtBestPrice = Utils.sumOfProperty(orderBook.bids[bestPrice], 'qty');
+                    const qtyAtBestPrice = Utils.sumOfProperty(orderBook.bids[bestPrice], 'leavesQty');
 
                     let matchQty = Math.min(qtyAtBestPrice, order.leavesQty);
                     if (matchQty > 0) {
