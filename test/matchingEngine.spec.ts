@@ -1,6 +1,6 @@
-import { MatchingEngine, OrderSide, MEErrorCode, MESuccessCode } from './matchingEngine';
+import { MatchingEngine, OrderSide, MEErrorCode } from '../src';
 
-import * as mocha from 'mocha';
+// import * as mocha from 'mocha';
 import * as chai from 'chai';
 const expect = chai.expect;
 
