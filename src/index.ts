@@ -164,7 +164,7 @@ export class MatchingEngine {
                                 orderId: orderHit.orderId,
                                 instrument: orderHit.instrument,
                                 tradePrice: bestPrice,
-                                tradeQty: matchQty,
+                                tradeQty: orderMatchQuantity,
                                 tradeSide: OrderSide.sell,
                                 tradeId: this.currTradeId
                             }));
@@ -178,7 +178,9 @@ export class MatchingEngine {
                             /**
                              * If Price has No Orders, Delete Depth
                              */
-                            delete orderBook.asks[bestPrice];
+                            if (orderBook.asks[bestPrice].length === 0) {
+                                delete orderBook.asks[bestPrice];
+                            }
                             /**
                              * Update Best Price
                              */
@@ -213,6 +215,7 @@ export class MatchingEngine {
                  * Calculated by adding Keys of OrderBook(Price)
                  */
                 let bestPrice = Utils.getObjMax(orderBook.bids);
+                console.log('The best price', bestPrice);
                 while (bestPrice !== null && (bestPrice === 0 || price <= bestPrice) && order.leavesQty > 0) {
                     const qtyAtBestPrice = Utils.sumOfProperty(orderBook.bids[bestPrice], 'leavesQty');
 
@@ -248,7 +251,7 @@ export class MatchingEngine {
                                 orderId: orderHit.orderId,
                                 instrument: orderHit.instrument,
                                 tradePrice: bestPrice,
-                                tradeQty: matchQty,
+                                tradeQty: orderMatchQuantity,
                                 tradeSide: OrderSide.buy,
                                 tradeId: this.currTradeId
                             }));
@@ -262,7 +265,9 @@ export class MatchingEngine {
                             /**
                              * If Price has No Orders, Delete Depth
                              */
-                            delete orderBook.bids[bestPrice];
+                            if (orderBook.bids[bestPrice].length === 0) {
+                                delete orderBook.bids[bestPrice];
+                            }
                             /**
                              * Update Best Price
                              */
