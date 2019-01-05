@@ -215,7 +215,6 @@ export class MatchingEngine {
                  * Calculated by adding Keys of OrderBook(Price)
                  */
                 let bestPrice = Utils.getObjMax(orderBook.bids);
-                console.log('The best price', bestPrice);
                 while (bestPrice !== null && (bestPrice === 0 || price <= bestPrice) && order.leavesQty > 0) {
                     const qtyAtBestPrice = Utils.sumOfProperty(orderBook.bids[bestPrice], 'leavesQty');
 
