@@ -48,7 +48,7 @@ export enum OrderSide {
     sell
 }
 
-class Order {
+export class Order {
     orderId: number;
     instrument: string;
     price: number;
@@ -69,7 +69,7 @@ class Order {
     }
 }
 
-class Trade {
+export class Trade {
     orderId: number;
     instrument: string;
     tradePrice: number;
@@ -88,7 +88,7 @@ class Trade {
     }
 }
 
-class OrderBook {
+export class OrderBook {
     bids: { [price: number]: Array<Order> } = {};
     asks: { [price: number]: Array<Order> } = {};
     orderIdMap: { [orderId: number]: Order } = {};

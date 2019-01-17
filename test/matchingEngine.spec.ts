@@ -50,10 +50,10 @@ describe('Matching Engine Test Suite', () => {
     it('Should Match and PARTIALLY FILL "MAKER" order', () => {
         const instrument = 'DevD';
 
-        const orderResponseBuy = matchEngine.newOrder(instrument, 23.4, 5, OrderSide.buy);
+        const orderResponseBuy = matchEngine.newOrder(instrument, 230.4, 5, OrderSide.buy);
         const orderBuy = orderResponseBuy.data.order;
 
-        const orderResponseSell = matchEngine.newOrder(instrument, 23.4, 2, OrderSide.sell);
+        const orderResponseSell = matchEngine.newOrder(instrument, 230.4, 2, OrderSide.sell);
         const orderSell = orderResponseSell.data.order;
 
         const trades = orderResponseSell.data.trades;
@@ -64,12 +64,12 @@ describe('Matching Engine Test Suite', () => {
     });
 
     it('Should Match and PARTIALLY FILL "TAKER" order', () => {
-        const instrument = 'DevD';
+        const instrument = 'DevT';
 
-        const orderResponseBuy = matchEngine.newOrder(instrument, 23.4, 2, OrderSide.buy);
+        const orderResponseBuy = matchEngine.newOrder(instrument, 23.40, 2, OrderSide.buy);
         const orderBuy = orderResponseBuy.data.order;
 
-        const orderResponseSell = matchEngine.newOrder(instrument, 23.4, 5, OrderSide.sell);
+        const orderResponseSell = matchEngine.newOrder(instrument, 23.40, 5, OrderSide.sell);
         const orderSell = orderResponseSell.data.order;
 
         const trades = orderResponseSell.data.trades;
