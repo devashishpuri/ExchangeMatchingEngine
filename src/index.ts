@@ -366,19 +366,19 @@ export class MatchingEngine {
                     // break;
                     priceLevel.splice(i, 1);
 
+                    if (priceLevel.length === 0) {
+                        if (order.side === OrderSide.buy) {
+                            delete orderBook.bids[order.price];
+                        } else {
+                            delete orderBook.asks[order.price];
+                        }
+                    }
+
                     return {
                         status: true,
                         statusCode: MESuccessCode.orderCanceled,
                         message: `Order Cancelled`
                     };
-                }
-            }
-
-            if (priceLevel.length === 0) {
-                if (order.side === OrderSide.buy) {
-                    delete orderBook.bids[order.price];
-                } else {
-                    delete orderBook.asks[order.price];
                 }
             }
 
